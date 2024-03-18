@@ -1,0 +1,61 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+  filter/healthcheck:
+    traces:
+        span:
+          - 'attributes["http.target"] == "/healthcheck"'
+  redaction/creditcard:
+    allow_all_keys: true
+    blocked_values:
+      - "4[0-9]{12}(?:[0-9]{3})?" ## Visa credit card number
+      - "(5[1-5][0-9]{14})"       ## MasterCard number
+  transform/environment:
+    error_mode: ignore
+    trace_statements:
+      - context: resource
+        statements:
+          - set(attributes["environment"], "development")
+    log_statements:
+      - context: resource
+        statements:
+          - set(attributes["environment"], "development")
+    metric_statements:
+      - context: resource
+        statements:
+          - set(attributes["environment"], "development")
+    
+
+exporters:
+  otlp/aspire:
+    endpoint: $ASPIRE_ENDPOINT
+    tls:
+        insecure: true
+  
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: 
+        - batch
+        - filter/healthcheck
+        - redaction/creditcard
+        - transform/environment
+      exporters: [otlp/aspire]
+    metrics:
+      receivers: [otlp]
+      processors: 
+        - batch
+        - transform/environment
+      exporters: [otlp/aspire]
+    logs:
+      receivers: [otlp]
+      processors: 
+        - batch
+        - transform/environment
+      exporters: [otlp/aspire]
