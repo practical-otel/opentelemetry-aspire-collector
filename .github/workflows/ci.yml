@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  prerequisites:
+  build-and-pack:
     name: prerequisites
     runs-on: ubuntu-latest
     permissions:
