@@ -21,4 +21,4 @@ jobs:
     - run: dotnet workload install aspire
     - run: dotnet build --configuration Release 
     - name: Create the package
-      run: dotnet pack --configuration Release -o artifacts /p:Version=${{ github.ref_name }}
+      run: dotnet pack --configuration Release -o artifacts
