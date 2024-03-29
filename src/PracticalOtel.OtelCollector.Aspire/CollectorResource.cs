@@ -1,6 +1,6 @@
 ﻿using Aspire.Hosting.ApplicationModel;
 
-namespace MartinDotNet.OtelCollector.Aspire;
+namespace PracticalOtel.OtelCollector.Aspire;
 
 public class CollectorResource : ContainerResource, IResourceWithEndpoints
 {

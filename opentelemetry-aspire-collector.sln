@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectorSample.Web", "samp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9D44A8C9-45AF-4264-9381-7DF8E4ED92C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MartinDotNet.OtelCollector.Aspire", "src\MartinDotNet.OtelCollector.Aspire\MartinDotNet.OtelCollector.Aspire.csproj", "{D55160FF-8AC6-4A90-8E27-36A68CA9633F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PracticalOtel.OtelCollector.Aspire", "src\PracticalOtel.OtelCollector.Aspire\PracticalOtel.OtelCollector.Aspire.csproj", "{D55160FF-8AC6-4A90-8E27-36A68CA9633F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

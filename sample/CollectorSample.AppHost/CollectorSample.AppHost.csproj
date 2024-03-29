@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CollectorSample.ApiService\CollectorSample.ApiService.csproj" />
     <ProjectReference Include="..\CollectorSample.Web\CollectorSample.Web.csproj" />
-    <ProjectReference Include="..\..\src\MartinDotNet.OtelCollector.Aspire\MartinDotNet.OtelCollector.Aspire.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\..\src\PracticalOtel.OtelCollector.Aspire\PracticalOtel.OtelCollector.Aspire.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
   <ItemGroup>

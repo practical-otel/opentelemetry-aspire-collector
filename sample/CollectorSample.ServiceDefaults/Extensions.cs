@@ -45,7 +45,9 @@ public static class Extensions
                 metrics.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
                        .AddProcessInstrumentation()
-                       .AddRuntimeInstrumentation();
+                       .AddRuntimeInstrumentation()
+                       .AddMeter("Microsoft.AspNetCore.Hosting")
+                       .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
             })
             .WithTracing(tracing =>
             {
@@ -75,17 +77,6 @@ public static class Extensions
             builder.Services.ConfigureOpenTelemetryMeterProvider(metrics => metrics.AddOtlpExporter());
             builder.Services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddOtlpExporter());
         }
-
-        // Uncomment the following lines to enable the Prometheus exporter (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)
-        // builder.Services.AddOpenTelemetry()
-        //    .WithMetrics(metrics => metrics.AddPrometheusExporter());
-
-        // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-        //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-        //{
-        //    builder.Services.AddOpenTelemetry()
-        //       .UseAzureMonitor();
-        //}
 
         return builder;
     }

@@ -1,6 +1,6 @@
 using Aspire.Hosting.Lifecycle;
 using Aspire.Hosting.Utils;
-using MartinDotNet.OtelCollector.Aspire;
+using PracticalOtel.OtelCollector.Aspire;
 
 namespace Aspire.Hosting;
 

@@ -1,8 +1,7 @@
-using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Lifecycle;
 using Microsoft.Extensions.Logging;
 
-namespace MartinDotNet.OtelCollector.Aspire;
+namespace PracticalOtel.OtelCollector.Aspire;
 
 public class EnvironmentVariableHook : IDistributedApplicationLifecycleHook
 {
