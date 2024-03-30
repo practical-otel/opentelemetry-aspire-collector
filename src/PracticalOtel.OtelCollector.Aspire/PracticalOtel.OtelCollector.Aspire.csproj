@@ -7,6 +7,16 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Title>OpenTelemetry Collector Component</Title>
+    <Description>An Aspire Component for adding an OpenTelemetry Collector</Description>
+    <PackageProjectUrl>https://github.com/practical-otel/opentelemetry-aspire-collector</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/practical-otel/opentelemetry-aspire-collector</RepositoryUrl>
+    <PackageTags>Aspire OpenTelemetry</PackageTags>
+    <Authors>MartinDotNet</Authors>
+    <Company>Practical Otel</Company>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting" Version="8.0.0-preview.4.24156.9" />
   </ItemGroup>
