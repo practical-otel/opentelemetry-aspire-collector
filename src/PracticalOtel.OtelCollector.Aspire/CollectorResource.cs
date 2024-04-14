@@ -2,17 +2,11 @@
 
 namespace PracticalOtel.OtelCollector.Aspire;
 
-public class CollectorResource : ContainerResource, IResourceWithEndpoints
+public class CollectorResource(string name) : ContainerResource(name)
 {
     internal static string GRPCEndpointName = "grpc";
     internal static string HTTPEndpointName = "http";
 
-    public EndpointReference GRPCEndpoint { get; }
-    public EndpointReference HTTPEndpoint { get; }
-
-    public CollectorResource(string name) : base(name)
-    {
-        GRPCEndpoint = new(this, GRPCEndpointName);
-        HTTPEndpoint = new(this, HTTPEndpointName);
-    }
+    public EndpointReference GRPCEndpoint => new(this, GRPCEndpointName);
+    public EndpointReference HTTPEndpoint => new(this, HTTPEndpointName);
 }

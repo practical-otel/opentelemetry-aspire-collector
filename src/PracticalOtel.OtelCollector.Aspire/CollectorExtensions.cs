@@ -1,5 +1,6 @@
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Lifecycle;
-using Aspire.Hosting.Utils;
+using Microsoft.Extensions.Configuration;
 using PracticalOtel.OtelCollector.Aspire;
 
 namespace Aspire.Hosting;
@@ -20,13 +21,13 @@ public static class CollectorExtensions
     {
         var url = builder.Configuration[DashboardOtlpUrlVariableName] ?? DashboardOtlpUrlDefaultValue;
 
-        var dashboardOtlpEndpoint = HostNameResolver.ReplaceLocalhostWithContainerHost(url, builder.Configuration);
+        var dashboardOtlpEndpoint = ReplaceLocalhostWithContainerHost(url, builder.Configuration);
 
         var resource = new CollectorResource(name);
         return builder.AddResource(resource)
-            .WithEndpoint(hostPort: 4317, name: CollectorResource.GRPCEndpointName, scheme: "http")
-            .WithEndpoint(hostPort: 4318, name: CollectorResource.HTTPEndpointName, scheme: "http")
-            .WithAnnotation(new ContainerImageAnnotation { Image = "otel/opentelemetry-collector-contrib", Tag = "latest" })
+            .WithImage("ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib", "latest")
+            .WithEndpoint(port: 4317, targetPort:4317, name: CollectorResource.GRPCEndpointName, scheme: "http")
+            .WithEndpoint(port: 4318, targetPort:4318, name: CollectorResource.HTTPEndpointName, scheme: "http")
             .WithBindMount(configFileLocation, "/etc/otelcol-contrib/config.yaml")
             .WithEnvironment("ASPIRE_ENDPOINT", dashboardOtlpEndpoint);
     }
@@ -42,4 +43,12 @@ public static class CollectorExtensions
         return builder;
     }
 
+    private static string ReplaceLocalhostWithContainerHost(string value, IConfiguration configuration)
+    {
+        var hostName = configuration["AppHost:ContainerHostname"] ?? "host.docker.internal";
+
+        return value.Replace("localhost", hostName, StringComparison.OrdinalIgnoreCase)
+                    .Replace("127.0.0.1", hostName)
+                    .Replace("[::1]", hostName);
+    }
 }
