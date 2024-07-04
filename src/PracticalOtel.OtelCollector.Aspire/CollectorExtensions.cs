@@ -8,6 +8,7 @@ namespace Aspire.Hosting;
 public static class CollectorExtensions
 {
     private const string DashboardOtlpUrlVariableName = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string DashboardOtlpApiKeyVariableName = "AppHost:OtlpApiKey";
     private const string DashboardOtlpUrlDefaultValue = "http://localhost:18889";
 
     /// <summary>
@@ -29,7 +30,8 @@ public static class CollectorExtensions
             .WithEndpoint(port: 4317, targetPort:4317, name: CollectorResource.GRPCEndpointName, scheme: "http")
             .WithEndpoint(port: 4318, targetPort:4318, name: CollectorResource.HTTPEndpointName, scheme: "http")
             .WithBindMount(configFileLocation, "/etc/otelcol-contrib/config.yaml")
-            .WithEnvironment("ASPIRE_ENDPOINT", dashboardOtlpEndpoint);
+            .WithEnvironment("ASPIRE_ENDPOINT", dashboardOtlpEndpoint)
+            .WithEnvironment("ASPIRE_API_KEY", builder.Configuration[DashboardOtlpApiKeyVariableName]);
     }
 
     /// <summary>
