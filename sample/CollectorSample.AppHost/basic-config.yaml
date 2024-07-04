@@ -11,7 +11,7 @@ exporters:
   debug:
     verbosity: detailed
   otlp/aspire:
-    endpoint: $ASPIRE_ENDPOINT
+    endpoint: ${env:ASPIRE_ENDPOINT}
     tls:
         insecure: true
   
