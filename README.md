@@ -27,7 +27,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
 
 processors:
   batch:
@@ -36,7 +38,9 @@ exporters:
   debug:
     verbosity: detailed
   otlp/aspire:
-    endpoint: $ASPIRE_ENDPOINT
+    endpoint: ${env:ASPIRE_ENDPOINT}
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_API_KEY}
     tls:
         insecure: true
   
@@ -63,7 +67,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
 
 processors:
   batch:
@@ -95,6 +101,8 @@ processors:
 exporters:
   otlp/aspire:
     endpoint: $ASPIRE_ENDPOINT
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_API_KEY}
     tls:
         insecure: true
   
