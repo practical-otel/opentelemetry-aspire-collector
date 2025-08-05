@@ -7,7 +7,8 @@ namespace Aspire.Hosting;
 
 public static class CollectorExtensions
 {
-    private const string DashboardOtlpUrlVariableName = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string DashboardOtlpUrlVariableNameLegacy = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string DashboardOtlpUrlVariableName = "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL";
     private const string DashboardOtlpApiKeyVariableName = "AppHost:OtlpApiKey";
     private const string DashboardOtlpUrlDefaultValue = "http://localhost:18889";
 
@@ -20,7 +21,8 @@ public static class CollectorExtensions
     /// <returns></returns>
     public static IResourceBuilder<CollectorResource> AddOpenTelemetryCollector(this IDistributedApplicationBuilder builder, string name, string configFileLocation)
     {
-        var url = builder.Configuration[DashboardOtlpUrlVariableName] ?? DashboardOtlpUrlDefaultValue;
+        var url = builder.Configuration[DashboardOtlpUrlVariableNameLegacy] ??
+            builder.Configuration[DashboardOtlpUrlVariableName] ?? DashboardOtlpUrlDefaultValue;
 
         var dashboardOtlpEndpoint = ReplaceLocalhostWithContainerHost(url, builder.Configuration);
 
