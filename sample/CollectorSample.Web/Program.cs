@@ -21,6 +21,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
 
+var openTelemetryDebugLogger = app.Services.GetRequiredService<LoggingOpenTelemetryListener>();
+
 app.UseStaticFiles();
 
 app.UseAntiforgery();

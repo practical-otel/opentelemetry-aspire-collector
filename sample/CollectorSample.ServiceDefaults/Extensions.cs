@@ -1,3 +1,4 @@
+using System.Diagnostics.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,8 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
+        builder.Services.AddSingleton<LoggingOpenTelemetryListener>();
+        
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
@@ -105,5 +108,26 @@ public static class Extensions
         });
 
         return app;
+    }
+}
+
+
+public class LoggingOpenTelemetryListener : EventListener
+{
+    private readonly ILogger<LoggingOpenTelemetryListener> _logger;
+ 
+    public LoggingOpenTelemetryListener(ILogger<LoggingOpenTelemetryListener> logger)
+    {
+        _logger = logger;
+    }
+    protected override void OnEventSourceCreated(EventSource eventSource)
+    {
+        if (eventSource.Name.StartsWith("OpenTelemetry"))
+            EnableEvents(eventSource, EventLevel.Error);
+    }
+ 
+    protected override void OnEventWritten(EventWrittenEventArgs eventData)
+    {
+        _logger.LogWarning(eventData.Message, eventData.Payload?.Select(p => p?.ToString())?.ToArray());
     }
 }

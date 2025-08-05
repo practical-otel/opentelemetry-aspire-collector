@@ -1,6 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddOpenTelemetryCollector("collector", "config.yaml")
+builder.AddOpenTelemetryCollector("collector")
+    .AddConfig("config.yaml")
     .WithAppForwarding();
 
 var apiService = builder.AddProject<Projects.CollectorSample_ApiService>("apiservice");
