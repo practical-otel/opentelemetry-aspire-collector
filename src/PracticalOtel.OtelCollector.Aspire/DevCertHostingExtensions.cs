@@ -37,6 +37,9 @@ internal static class DevCertHostingExtensions
                     return;
                 }
 
+                var certKeyFileDest = "";
+                var certFileDest = "";
+
                 if (builder.Resource is ContainerResource containerResource)
                 {
                     // Bind-mount the certificate files into the container.
@@ -47,13 +50,17 @@ internal static class DevCertHostingExtensions
 
                     var bindSource = Path.GetDirectoryName(certPath) ?? throw new UnreachableException();
 
-                    var certFileDest = $"{DEV_CERT_BIND_MOUNT_DEST_DIR}/{certFileName}";
-                    var certKeyFileDest = $"{DEV_CERT_BIND_MOUNT_DEST_DIR}/{certKeyFileName}";
+                    certFileDest = $"{DEV_CERT_BIND_MOUNT_DEST_DIR}/{certFileName}";
+                    certKeyFileDest = $"{DEV_CERT_BIND_MOUNT_DEST_DIR}/{certKeyFileName}";
 
-                    builder.ApplicationBuilder.CreateResourceBuilder(containerResource)
-                        .WithBindMount(bindSource, DEV_CERT_BIND_MOUNT_DEST_DIR, isReadOnly: true)
-                        .WithEnvironment(certFileEnv, certFileDest)
-                        .WithEnvironment(certKeyFileEnv, certKeyFileDest);
+                    containerResource.TryGetContainerMounts(out var mounts);
+                    if (mounts is null || !mounts.Any(m => m.Source == bindSource))
+                    {
+                        builder.ApplicationBuilder.CreateResourceBuilder(containerResource)
+                            .WithBindMount(bindSource, DEV_CERT_BIND_MOUNT_DEST_DIR, isReadOnly: false)
+                            .WithEnvironment(certFileEnv, certFileDest)
+                            .WithEnvironment(certKeyFileEnv, certKeyFileDest);
+                    }
                 }
                 else
                 {
@@ -64,7 +71,7 @@ internal static class DevCertHostingExtensions
 
                 if (onSuccessfulExport is not null)
                 {
-                    onSuccessfulExport(certPath, certKeyPath);
+                    onSuccessfulExport(certFileDest, certKeyFileDest);
                 }
             });
         }

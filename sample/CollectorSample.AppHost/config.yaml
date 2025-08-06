@@ -39,7 +39,7 @@ exporters:
     headers:
       x-otlp-api-key: ${env:ASPIRE_API_KEY}
     tls:
-        insecure: true
+        insecure_skip_verify: true
   
 service:
   pipelines:

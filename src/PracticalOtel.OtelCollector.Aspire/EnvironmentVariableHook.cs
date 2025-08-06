@@ -4,14 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace PracticalOtel.OtelCollector.Aspire;
 
-public class EnvironmentVariableHook : IDistributedApplicationLifecycleHook
+public class EnvironmentVariableHook(ILogger<EnvironmentVariableHook> logger) : IDistributedApplicationLifecycleHook
 {
-    private readonly ILogger<EnvironmentVariableHook> _logger;
 
-    public EnvironmentVariableHook(ILogger<EnvironmentVariableHook> logger)
-    {
-        _logger = logger;
-    }
     public Task AfterEndpointsAllocatedAsync(DistributedApplicationModel appModel, CancellationToken cancellationToken)
     {
         var resources = appModel.GetProjectResources();
@@ -19,31 +14,37 @@ public class EnvironmentVariableHook : IDistributedApplicationLifecycleHook
 
         if (collectorResource == null)
         {
-            _logger.LogWarning("No collector resource found");
+            logger.LogWarning("No collector resource found");
             return Task.CompletedTask;
         }
 
-        var endpoint = collectorResource!.GetEndpoint(collectorResource!.GRPCEndpoint.EndpointName);
-        if (endpoint == null)
-        {
-            _logger.LogWarning("No endpoint for the collector");
-            return Task.CompletedTask;
-        }
+        var grpcEndpoint = collectorResource!.GetEndpoint(collectorResource!.GRPCEndpoint.EndpointName);
+        var httpEndpoint = collectorResource!.GetEndpoint(collectorResource!.HTTPEndpoint.EndpointName);
 
-        if (resources.Count() == 0)
+        if (!resources.Any())
         {
-            _logger.LogInformation("No resources to add Environment Variables to");
+            logger.LogInformation("No resources to add Environment Variables to");
         }
 
         foreach (var resourceItem in resources)
         {
-            _logger.LogDebug($"Forwarding Telemetry for {resourceItem.Name} to the collector");
+            logger.LogDebug("Forwarding Telemetry for {name} to the collector", resourceItem.Name);
             if (resourceItem == null) continue;
 
             resourceItem.Annotations.Add(new EnvironmentCallbackAnnotation((EnvironmentCallbackContext context) =>
             {
+                var protocol = context.EnvironmentVariables.GetValueOrDefault("OTEL_EXPORTER_OTLP_PROTOCOL", "");
+                var endpoint = protocol.ToString() == "http/protobuf" ? httpEndpoint : grpcEndpoint;
+
+                if (endpoint == null)
+                {
+                    logger.LogWarning("No {protocol} endpoint on the collector for {resourceName} to use",
+                        protocol, resourceItem.Name);
+                    return;
+                }
+                
                 if (context.EnvironmentVariables.ContainsKey("OTEL_EXPORTER_OTLP_ENDPOINT"))
-                    context.EnvironmentVariables.Remove("OTEL_EXPORTER_OTLP_ENDPOINT");
+                        context.EnvironmentVariables.Remove("OTEL_EXPORTER_OTLP_ENDPOINT");
                 context.EnvironmentVariables.Add("OTEL_EXPORTER_OTLP_ENDPOINT", endpoint.Url);
             }));
         }

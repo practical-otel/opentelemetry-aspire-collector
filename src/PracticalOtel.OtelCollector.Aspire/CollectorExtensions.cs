@@ -31,28 +31,38 @@ public static class CollectorExtensions
         var settings = new OpenTelemetryCollectorSettings();
         configureSettings?.Invoke(settings);
 
-        var isHttpsEnabled = url.StartsWith("https", StringComparison.OrdinalIgnoreCase);
+        var isHttpsEnabled = !settings.ForceNonSecureReceiver && url.StartsWith("https", StringComparison.OrdinalIgnoreCase);
 
         var dashboardOtlpEndpoint = ReplaceLocalhostWithContainerHost(url, builder.Configuration);
 
         var resource = new CollectorResource(name);
         var resourceBuilder = builder.AddResource(resource)
             .WithImage(settings.CollectorImage, settings.CollectorVersion)
-            .WithEndpoint(port: 4317, targetPort: 4317, name: CollectorResource.GRPCEndpointName, scheme: "http")
-            .WithEndpoint(port: 4318, targetPort: 4318, name: CollectorResource.HTTPEndpointName, scheme: "http")
             .WithEnvironment("ASPIRE_ENDPOINT", dashboardOtlpEndpoint)
             .WithEnvironment("ASPIRE_API_KEY", builder.Configuration[DashboardOtlpApiKeyVariableName]);
 
+        if (settings.EnableGrpcEndpoint)
+            resourceBuilder.WithEndpoint(targetPort: 4317, name: CollectorResource.GRPCEndpointName, scheme: isHttpsEnabled ? "https" : "http");
+        if (settings.EnableHttpEndpoint)
+            resourceBuilder.WithEndpoint(targetPort: 4318, name: CollectorResource.HTTPEndpointName, scheme: isHttpsEnabled ? "https" : "http");
 
-        if (isHttpsEnabled && builder.ExecutionContext.IsRunMode && builder.Environment.IsDevelopment())
+
+        if (!settings.ForceNonSecureReceiver && isHttpsEnabled && builder.ExecutionContext.IsRunMode && builder.Environment.IsDevelopment())
         {
             DevCertHostingExtensions.RunWithHttpsDevCertificate(resourceBuilder, "HTTPS_CERT_FILE", "HTTPS_CERT_KEY_FILE", (certFilePath, certKeyPath) =>
             {
-                // Set TLS details using YAML path via the command line. This allows the values to be added to the existing config file.
-                // Setting the values in the config file doesn't work because adding the "tls" section always enables TLS, even if there is no cert provided.
-                resourceBuilder.WithArgs(
-                    $@"--config=yaml:${settings.CertificateFileLocator}: ""dev-certs/dev-cert.pem""",
-                    $@"--config=yaml:${settings.KeyFileLocator}: ""dev-certs/dev-cert.key""");
+                if (settings.EnableHttpEndpoint)
+                {
+                    resourceBuilder.WithArgs(
+                        $@"--config=yaml:receivers::otlp::protocols::http::tls::cert_file: ""{certFilePath}""",
+                        $@"--config=yaml:receivers::otlp::protocols::http::tls::key_file: ""{certKeyPath}""");
+                }
+                if (settings.EnableGrpcEndpoint)
+                {
+                    resourceBuilder.WithArgs(
+                        $@"--config=yaml:receivers::otlp::protocols::grpc::tls::cert_file: ""{certFilePath}""",
+                        $@"--config=yaml:receivers::otlp::protocols::grpc::tls::key_file: ""{certKeyPath}""");
+                }
             });
         }
         return resourceBuilder;
@@ -84,7 +94,7 @@ public static class CollectorExtensions
     /// <param name="builder"></param>
     /// <param name="configPath"></param>
     /// <returns></returns>
-    public static IResourceBuilder<CollectorResource> AddConfig(this IResourceBuilder<CollectorResource> builder, string configPath)
+    public static IResourceBuilder<CollectorResource> WithConfig(this IResourceBuilder<CollectorResource> builder, string configPath)
     {
         var configFileInfo = new FileInfo(configPath);
         return builder.WithBindMount(configPath, $"/config/{configFileInfo.Name}")
