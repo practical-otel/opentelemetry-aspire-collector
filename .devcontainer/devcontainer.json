@@ -3,7 +3,7 @@
 	"name": "C# (.NET)",
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:3": {}
 	},
     "postCreateCommand": "bash .devcontainer/init.sh"
 }
